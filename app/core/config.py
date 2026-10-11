@@ -32,7 +32,14 @@ class Config:
     APP_RESET_URL = os.getenv("APP_RESET_URL", "http://localhost:5173/reset-password")
     GOOGLE_CLIENT_ID = os.getenv("GOOGLE_CLIENT_ID", "")
 
-    CORS_ORIGINS = [x.strip() for x in os.getenv("CORS_ORIGINS", "http://localhost:5173").split(",") if x.strip()]
+    CORS_ORIGINS = [
+    origin.strip().rstrip("/")
+    for origin in os.getenv(
+        "CORS_ORIGINS",
+        "http://localhost:5173,http://localhost:61718",
+    ).split(",")
+    if origin.strip()
+]
     RATE_LIMIT_STORAGE_URI = os.getenv("RATE_LIMIT_STORAGE_URI", "memory://")
 
     SMTP_HOST = os.getenv("SMTP_HOST", "")

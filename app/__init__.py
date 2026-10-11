@@ -20,7 +20,23 @@ def create_app(config_object=Config):
     init_mongo(app)
     jwt.init_app(app)
     limiter.init_app(app)
-    CORS(app, resources={r"/api/*": {"origins": app.config["CORS_ORIGINS"]}}, supports_credentials=False)
+    CORS(
+    app,
+    resources={
+        r"/api/*": {
+            "origins": app.config["CORS_ORIGINS"],
+            "methods": [
+                "GET", "POST", "PUT", "PATCH",
+                "DELETE", "OPTIONS",
+            ],
+            "allow_headers": [
+                "Content-Type",
+                "Authorization",
+            ],
+        }
+    },
+    supports_credentials=False,
+)
 
     from app.api.v1.auth_routes import bp as auth_bp
     from app.api.v1.user_routes import bp as user_bp

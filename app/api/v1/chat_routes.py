@@ -35,4 +35,4 @@ bp = Blueprint(
 )
 
 
-# chat_service = ChatService()
+chat_service = ChatService()
