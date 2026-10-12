@@ -35,4 +35,36 @@ bp = Blueprint(
 )
 
 
-chat_service = ChatService()
+def get_chat_service():
+    return ChatService()
+
+@bp.post("/conversations")
+@jwt_required()
+def create_conversation():
+    user_id = get_jwt_identity()
+    service = ChatService()
+
+    try:
+        data = request.get_json(silent=True) or {}
+        payload = CreateConversationSchema.model_validate(data)
+
+        conversation = service.create_conversation(
+            user_id=user_id,
+            title=getattr(payload, "title", "New Chat"),
+            model=getattr(payload, "model", "gpt-5"),
+        )
+
+        return ok(conversation_to_dict(conversation))
+
+    except ValidationError:
+        return fail(
+            "Invalid request data",
+            400,
+            "validation_error",
+        )
+    except ValueError as exc:
+        return fail(
+            str(exc),
+            400,
+            "invalid_request",
+        )

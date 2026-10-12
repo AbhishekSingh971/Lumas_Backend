@@ -55,22 +55,49 @@ def create_app(config_object=Config):
         chat_stream_bp,
     ):
         app.register_blueprint(blueprint, url_prefix=prefix + blueprint.url_prefix)
+        
 
     @jwt.token_in_blocklist_loader
     def token_is_revoked(jwt_header, jwt_payload):
-        return TokenRepository().is_revoked(jwt_payload["jti"])
+        return TokenRepository().is_revoked(
+            jwt_payload["jti"]
+        )
 
     @jwt.unauthorized_loader
     def unauthorized(reason):
-        return fail("Authentication required", 401, "authentication_required")
+        print("[JWT UNAUTHORIZED]", reason)
+        return fail(
+            "Authentication required",
+            401,
+            "authentication_required",
+        )
 
     @jwt.invalid_token_loader
     def invalid_token(reason):
-        return fail("Invalid token", 401, "invalid_token")
+        print("[JWT INVALID]", reason)
+        return fail(
+            "Invalid token",
+            401,
+            "invalid_token",
+        )
+
+    @jwt.expired_token_loader
+    def expired_token(jwt_header, jwt_payload):
+        print("[JWT EXPIRED]", jwt_payload)
+        return fail(
+            "Access token expired. Please log in again.",
+            401,
+            "token_expired",
+        )
 
     @jwt.revoked_token_loader
     def revoked_token(jwt_header, jwt_payload):
-        return fail("Token has been revoked", 401, "revoked_token")
+        print("[JWT REVOKED]", jwt_payload.get("jti"))
+        return fail(
+            "Token has been revoked",
+            401,
+            "revoked_token",
+        )
 
     @app.errorhandler(404)
     def not_found(error):
